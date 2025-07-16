@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/04 16:02:41 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/16 07:35:44 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 # include <stdbool.h>
 # include <sys/time.h>
 # include <unistd.h>
+# include <string.h>
+# include <stdint.h>
 # include <stdlib.h>
 # include <stdio.h>
 # include <pthread.h>
@@ -33,6 +35,12 @@ typedef enum e_return
 	RETURN_SUCESS,
 	RETURN_FAILURE
 }	t_return;
+
+typedef enum e_fork_side
+{
+	FORK_LEFT,
+	FORK_RIGHT
+}	t_fork_side;
 
 typedef enum e_philo_state
 {
@@ -70,7 +78,6 @@ typedef struct s_philo
 	t_data			*data;
 	t_fork			*fork_left;
 	t_fork			*fork_right;
-	bool			can_eat;
 	size_t			meals_eaten_nb;
 	suseconds_t		remaining_time;
 	pthread_mutex_t	mutex_remaining_time;
