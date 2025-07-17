@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/16 07:35:44 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/17 05:04:32 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,9 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <pthread.h>
+
+# define ERROR_MALLOC "Error: malloc\n"
+# define ERROR_MUTEX_INIT "Error: mutex_init\n"
 
 # define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
 # define PHILO_EATING_MSG "is eating\n"
@@ -67,9 +70,11 @@ typedef struct s_data
 	suseconds_t	time_to_die;
 	suseconds_t	time_to_sleep;
 	suseconds_t		timestamp;
+	bool			start_of_simulation;
 	bool			end_of_simulation;
 	pthread_mutex_t	mutex_timestamp;
-	pthread_mutex_t	mutex_simulation;
+	pthread_mutex_t	mutex_simulation_start;
+	pthread_mutex_t	mutex_simulation_end;
 }	t_data;
 
 typedef struct s_philo
@@ -79,8 +84,8 @@ typedef struct s_philo
 	t_fork			*fork_left;
 	t_fork			*fork_right;
 	size_t			meals_eaten_nb;
-	suseconds_t		remaining_time;
-	pthread_mutex_t	mutex_remaining_time;
+	suseconds_t		last_time_eat;
+	pthread_mutex_t	mutex_last_time_eat;
 	pthread_mutex_t	mutex_meals_eaten_nb;
 
 }	t_philo;
