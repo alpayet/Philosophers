@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/18 03:03:55 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/18 10:07:23 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,16 @@
 # include <stdio.h>
 # include <pthread.h>
 
+# define NB_MAX_THREADS 300
 # define ERROR_MALLOC "Error: malloc\n"
 # define ERROR_MUTEX_INIT "Error: mutex_init\n"
 # define ERROR_THREAD_CREATE "Error: thread_create_init\n"
-# define NB_MAX_THREADS 300
 
 # define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
 # define PHILO_EATING_MSG "is eating\n"
 # define PHILO_SLEEPING_MSG "is sleeping\n"
 # define PHILO_THINKING_MSG "is thinking\n"
 # define PHILO_DEAD_MSG "died\n"
-# define milliseconds long
 
 typedef enum e_return
 {
@@ -40,18 +39,6 @@ typedef enum e_return
 	RETURN_SUCESS,
 	RETURN_FAILURE
 }	t_return;
-
-typedef enum e_fork_side
-{
-	FORK_LEFT,
-	FORK_RIGHT
-}	t_fork_side;
-
-typedef enum e_philo_state
-{
-	DEAD,
-	ALIVE
-}	t_philo_state;
 
 typedef enum e_fork_state
 {
@@ -61,8 +48,8 @@ typedef enum e_fork_state
 
 typedef struct s_fork
 {
-	t_fork_state	*state;
-	pthread_mutex_t	*mutex;
+	t_fork_state	state;
+	pthread_mutex_t	mutex;
 }	t_fork;
 
 typedef struct s_data

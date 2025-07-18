@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 03:21:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/17 05:04:32 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/18 09:59:19 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,14 +81,14 @@ t_return	philo_log(t_philo *philo, char *str)
 
 bool	fork_available(t_fork *fork)
 {
-	pthread_mutex_lock(fork->mutex);
-	if (*(fork->state) == AVAILABLE)
+	pthread_mutex_lock(&(fork->mutex));
+	if (fork->state == AVAILABLE)
 	{
-		*(fork->state) = NOT_AVAILABLE;
-		pthread_mutex_unlock(fork->mutex);
+		fork->state = NOT_AVAILABLE;
+		pthread_mutex_unlock(&(fork->mutex));
 		return (true);
 	}
-	pthread_mutex_unlock(fork->mutex);
+	pthread_mutex_unlock(&(fork->mutex));
 	return (false);
 }
 
@@ -163,12 +163,12 @@ t_return	philo_eating(t_philo *philo)
 	pthread_mutex_unlock(&(philo->mutex_meals_eaten_nb));
 	if (usleep_check(philo, philo->data->time_to_eat) == END_OF_SIMULATION)
 		return (END_OF_SIMULATION);
-	pthread_mutex_lock(philo->fork_left->mutex);
-	*(philo->fork_left->state) = AVAILABLE;
-	pthread_mutex_unlock(philo->fork_left->mutex);
-	pthread_mutex_lock(philo->fork_right->mutex);
-	*(philo->fork_right->state) = AVAILABLE;
-	pthread_mutex_unlock(philo->fork_right->mutex);
+	pthread_mutex_lock(&(philo->fork_left->mutex));
+	philo->fork_left->state = AVAILABLE;
+	pthread_mutex_unlock(&(philo->fork_left->mutex));
+	pthread_mutex_lock(&(philo->fork_right->mutex));
+	philo->fork_right->state = AVAILABLE;
+	pthread_mutex_unlock(&(philo->fork_right->mutex));
 	return (RETURN_SUCESS);
 }
 
