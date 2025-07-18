@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/17 05:38:12 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/18 07:50:11 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,84 +51,64 @@ bool	check_malloc(void *ptr)
 	return (true);
 }
 
-void	finishing_simulation(t_philo *philos)
+void	finishing_simulation(t_data *data)
 {
-	pthread_mutex_lock(&(philos->data->mutex_simulation_end));
-	philos->data->end_of_simulation = true;
-	pthread_mutex_unlock(&(philos->data->mutex_simulation_end));
+	pthread_mutex_lock(&(data->mutex_simulation_end));
+	data->end_of_simulation = true;
+	pthread_mutex_unlock(&(data->mutex_simulation_end));
 }
 
-t_fork_state	*create_fork_state_tab(size_t fork_nb)
-{
-	t_fork_state *fork_state_tab;
-	size_t i;
-
-	fork_state_tab = malloc(fork_nb * sizeof(*fork_state_tab));
-	if (check_malloc(fork_state_tab) == false)
-		return (NULL);
-	i = 0;
-	while (i < fork_nb)
-	{
-		fork_state_tab[i] = AVAILABLE;
-		i++;
-	}
-	return (fork_state_tab);
-}
-
-void	destroy_mutex_tab(size_t mutex_nb, pthread_mutex_t *mutex_tab)
+void	destroy_mutexes_philos(size_t philo_nb, t_philo *philos)
 {
 	size_t	i;
 
 	i = 0;
-	while (i < mutex_nb)
+	while (i < philo_nb)
 	{
-		pthread_mutex_destroy(mutex_tab + i);
+		pthread_mutex_destroy(&(philos[i].mutex_last_time_eat));
+		pthread_mutex_destroy(&(philos[i].mutex_meals_eaten_nb));
 		i++;
 	}
 }
 
-pthread_mutex_t	*create_fork_mutex_tab(size_t fork_nb)
+void	destroy_mutex_forks(size_t fork_nb, t_fork *forks)
 {
-	pthread_mutex_t *fork_mutex_tab;
-	size_t i;
+	size_t	i;
 
-	fork_mutex_tab = malloc(fork_nb * sizeof(*fork_mutex_tab));
-	if (check_malloc(fork_mutex_tab) == false)
-		return (NULL);
 	i = 0;
 	while (i < fork_nb)
 	{
-		if (pthread_mutex_init(fork_mutex_tab + i, NULL) != 0)
+		pthread_mutex_destroy(forks[i].mutex);
+		i++;
+	}
+}
+
+t_fork	*create_forks(size_t fork_nb)
+{
+	t_fork	*forks;
+	size_t	i;
+
+	forks = malloc(fork_nb * sizeof(*forks));
+	i = 0;
+	while (i < fork_nb)
+	{
+		*(forks[i].state) = AVAILABLE;
+		if (pthread_mutex_init(forks[i].mutex, NULL) != 0)
 		{
 			print_error(ERROR_MUTEX_INIT);
-			destroy_mutex_tab(i, fork_mutex_tab);
-			free(fork_mutex_tab);
+			destroy_mutex_forks(i, forks);
+			free(forks);
 			return (NULL);
 		}
 		i++;
 	}
-	return (fork_mutex_tab);
+	return (forks);
 }
 
-t_fork	*create_fork(t_fork_state *state, pthread_mutex_t *mutex)
-{
-	t_fork *fork;
-
-	fork = malloc(sizeof(*fork));
-	if (fork == NULL)
-		return (NULL);
-	fork->state = state;
-	fork->mutex = mutex;
-	return (fork);
-}
-
-void	free_ressources(size_t philo_nb, t_fork_state *fork_state_tab,
-	pthread_mutex_t *fork_mutex_tab, t_philo *philos)
+void	free_ressources(size_t philo_nb, , t_philo *philos)
 {
 	size_t	i;
 
-	free(fork_state_tab);
-	free(fork_mutex_tab);
 	if (philos == NULL)
 		return ;
 	i = 0;
@@ -141,7 +121,7 @@ void	free_ressources(size_t philo_nb, t_fork_state *fork_state_tab,
 	free(philos);
 }
 
-bool	initialize_philo_fork(t_fork **fork, t_fork_state *fork_state, pthread_mutex_t *fork_mutex_tab)
+bool	init_philo_fork(t_fork **fork, t_fork_state *fork_state, pthread_mutex_t *fork_mutex_tab)
 {
 	*fork = create_fork(fork_state, fork_mutex_tab);
 	if (check_malloc(*fork) == false)
@@ -149,53 +129,38 @@ bool	initialize_philo_fork(t_fork **fork, t_fork_state *fork_state, pthread_mute
 	return (true);
 }
 
-bool	initialize_philo_mutexes(t_philo *philo)
+bool	init_philo_mutexes(t_philo *philo)
 {
 	if (pthread_mutex_init(&(philo->mutex_last_time_eat), NULL) != 0)
-	{
-		print_error(ERROR_MUTEX_INIT);
 		return (false);
-	}
 	if (pthread_mutex_init(&(philo->mutex_meals_eaten_nb), NULL) != 0)
 	{
-		print_error(ERROR_MUTEX_INIT);
 		pthread_mutex_destroy(&(philo->mutex_last_time_eat));
 		return (false);
 	}
 	return (true);
 }
 
-t_philo	*cleanup_philos_return_null(t_philo *philos, size_t philo_nb)
+t_philo	*cleanup_philos_return_null(size_t philo_nb, t_philo *philos)
 {
-	size_t	i;
-
-	i = 0;
-	while (i < philo_nb)
-	{
-		free(philos[i].fork_left);
-		free(philos[i].fork_right);
-		pthread_mutex_destroy(&(philos[i].mutex_last_time_eat));
-		pthread_mutex_destroy(&(philos[i].mutex_meals_eaten_nb));
-		i++;
-	}
+	destroy_mutexes_philos(philo_nb, philos);
 	free(philos);
 	return (NULL);
 }
 
-bool	initialize_philo_other_fields(t_philo *philo, size_t philo_id, t_data *data)
+bool	init_philo_other_fields(t_philo *philos, size_t index, t_data *data)
 {
 	struct timeval tv;
 
-	philo->philo_id = philo_id;
-	philo->data = data;
-	philo->meals_eaten_nb = 0;
+	philos[index].philo_id = index + 1;
+	philos[index].data = data;
+	philos[index].meals_eaten_nb = 0;
 	gettimeofday(&tv, NULL);
-	philo->last_time_eat = tv.tv_sec * 1000000 + tv.tv_usec;
+	philos[index].last_time_eat = tv.tv_sec * 1000000 + tv.tv_usec;
 	return (true);
 }
 
-t_philo	*create_philos(size_t philo_nb, t_fork_state *fork_state_tab,
-	pthread_mutex_t *fork_mutex_tab, t_data *data)
+t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 {
 	t_philo *philos;
 	size_t i;
@@ -206,19 +171,14 @@ t_philo	*create_philos(size_t philo_nb, t_fork_state *fork_state_tab,
 	i = 0;
 	while (i < philo_nb)
 	{
-		if (initialize_philo_fork(&(philos[i].fork_left),
-			fork_state_tab + i, fork_mutex_tab + i) == false)
-			return (cleanup_philos_return_null(philos, i));
-		if (initialize_philo_fork(&(philos[i].fork_right),
-			fork_state_tab + (i + 1) % philo_nb,
-			fork_mutex_tab + (i + 1) % philo_nb) == false)
+		philos[i].fork_left = forks + i;
+		philos[i].fork_right = forks + (i + 1) % philo_nb;
+		if (init_philo_mutexes(&(philos[i])) == false)
 		{
-			free(philos[i].fork_left);
-			return (cleanup_philos_return_null(philos, i));
+			print_error(ERROR_MUTEX_INIT);
+			return (cleanup_philos_return_null(i, philos));
 		}
-		if (initialize_philo_mutexes(&(philos[i])) == false)
-			return (cleanup_philos_return_null(philos, i));
-		initialize_philo_other_fields(&(philos[i]), i + 1, data);
+		init_philo_other_fields(philos, i, data);
 		i++;
 	}
 	return (philos);
@@ -234,6 +194,21 @@ void cleanup_threads(size_t threads_nb, pthread_t *thread_id_tab)
 		pthread_join(thread_id_tab[i], NULL);
 		i++;
 	}
+}
+
+bool	secur_thread_create(pthread_t *thread_id_tab, size_t index,
+	void *(*routine)(void *), t_philo *philo)
+{
+	if (index == NB_MAX_THREADS
+		|| pthread_create(thread_id_tab + index, NULL, routine, philo) != 0)
+	{
+		print_error(ERROR_THREAD_CREATE);
+		finishing_simulation(philo->data);
+		cleanup_threads(index, thread_id_tab);
+		free(thread_id_tab);
+		return (false);
+	}
+	return (true);
 }
 
 pthread_t	*creating_threads(size_t threads_nb, t_philo *philos)
@@ -252,13 +227,8 @@ pthread_t	*creating_threads(size_t threads_nb, t_philo *philos)
 			routine = thread_even_routine;
 		else
 			routine = thread_odd_routine;
-		if (pthread_create(thread_id_tab + i, NULL, routine, &(philos[i])) != 0)
-		{
-			finishing_simulation(philos);
-			cleanup_threads(i, thread_id_tab);
-			free(thread_id_tab);
+		if (secur_thread_create(thread_id_tab, i, routine, &(philos[i])) == false)
 			return (NULL);
-		}
 		i++;
 	}
 	pthread_mutex_lock(&(philos->data->mutex_simulation_start));
@@ -267,14 +237,14 @@ pthread_t	*creating_threads(size_t threads_nb, t_philo *philos)
 	return (thread_id_tab);
 }
 
-void	cleanup_mutexes(size_t threads_nb, pthread_mutex_t *fork_mutex_tab,
+void	cleanup_mutexes(size_t threads_nb, t_fork *forks,
 	t_data *data, t_philo *philos)
 {
 	size_t	i;
 
-	if (fork_mutex_tab == NULL)
+	if (forks == NULL)
 		return ;
-	destroy_mutex_tab(threads_nb, fork_mutex_tab);
+	destroy_mutex_forks(threads_nb, forks);
 	if (data == NULL)
 		return ;
 	pthread_mutex_destroy(&(data->mutex_timestamp));
@@ -282,16 +252,10 @@ void	cleanup_mutexes(size_t threads_nb, pthread_mutex_t *fork_mutex_tab,
 	pthread_mutex_destroy(&(data->mutex_simulation_end));
 	if (philos == NULL)
 		return ;
-	i = 0;
-	while (i < threads_nb)
-	{
-		pthread_mutex_destroy(&(philos[i].mutex_last_time_eat));
-		pthread_mutex_destroy(&(philos[i].mutex_meals_eaten_nb));
-		i++;
-	}
+	destroy_mutexes_philos(threads_nb, philos);
 }
 
-bool	initialize_data_mutexes(t_data *data)
+bool	init_data_mutexes(t_data *data)
 {
 	if (pthread_mutex_init(&(data->mutex_timestamp), NULL) != 0)
 	{
@@ -322,7 +286,7 @@ bool	init_data(t_data *data, char **argv)
 	data->timestamp = 0;
 	data->start_of_simulation = false;
 	data->end_of_simulation = false;
-	if (initialize_data_mutexes(data) == false)
+	if (init_data_mutexes(data) == false)
 		return (false);
 	return (true);
 }
@@ -351,7 +315,7 @@ void	monitor_philos(size_t philo_nb, t_philo *philos, size_t min_meals_eaten_nb)
 			{
 				pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
 				philo_log(&(philos[i]), PHILO_DEAD_MSG);
-				finishing_simulation(philos);
+				finishing_simulation(philos->data);
 				return;
 			}
 			pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
@@ -371,44 +335,36 @@ void	monitor_philos(size_t philo_nb, t_philo *philos, size_t min_meals_eaten_nb)
 		}
 		if (i == philo_nb)
 		{
-			finishing_simulation(philos);
+			finishing_simulation(philos->data);
 			return ;
 		}
 		usleep(500);
 	}
 }
 
+int	full_cleanup(size_t	thread_nb, t_fork *forks, t_data *data)
+{
+	cleanup_mutexes(thread_nb, forks, data, NULL);
+	free_ressources(thread_nb, fork_state_tab, fork_mutex_tab, NULL);
+	return (EXIT_FAILURE);
+}
+
 int	main(int argc, char **argv)
 {
-	t_fork_state *fork_state_tab;
-	pthread_mutex_t *fork_mutex_tab;
+	t_fork	*forks;
 	t_data data;
 	t_philo *philos;
 	pthread_t *thread_id_tab;
 
 	(void)argc;
-	fork_state_tab = create_fork_state_tab(atoi(argv[1]));
-	if (fork_state_tab == NULL)
+	forks = create_forks(atoi(argv[1]));
+	if (forks == NULL)
 		return (EXIT_FAILURE);
-	fork_mutex_tab = create_fork_mutex_tab(atoi(argv[1]));
-	if (fork_mutex_tab == NULL)
-	{
-		free_ressources(atoi(argv[1]), fork_state_tab, NULL, NULL);
-		return (EXIT_FAILURE);
-	}
 	if (init_data(&data, argv) == false)
-	{
-		cleanup_mutexes(atoi(argv[1]), fork_mutex_tab, NULL, NULL);
-		free_ressources(atoi(argv[1]), fork_state_tab, fork_mutex_tab, NULL);
-		return (EXIT_FAILURE);
-	}
-	philos = create_philos(atoi(argv[1]), fork_state_tab, fork_mutex_tab, &data);
+		return (full_cleanup(atoi(argv[1]), forks, NULL));
+	philos = create_philos(atoi(argv[1]), forks, &data);
 	if (philos == NULL)
-	{
-		cleanup_mutexes(atoi(argv[1]), fork_mutex_tab, &data, NULL);
-		free_ressources(atoi(argv[1]), fork_state_tab, fork_mutex_tab, NULL);
-		return (EXIT_FAILURE);
-	}
+		return (full_cleanup(atoi(argv[1]), fork_state_tab, fork_mutex_tab, &data));
 	thread_id_tab = creating_threads(atoi(argv[1]), philos);
 	if (thread_id_tab == NULL)
 	{

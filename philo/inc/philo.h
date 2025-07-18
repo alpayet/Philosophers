@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/17 05:04:32 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/18 03:03:55 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@
 
 # define ERROR_MALLOC "Error: malloc\n"
 # define ERROR_MUTEX_INIT "Error: mutex_init\n"
+# define ERROR_THREAD_CREATE "Error: thread_create_init\n"
+# define NB_MAX_THREADS 300
 
 # define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
 # define PHILO_EATING_MSG "is eating\n"
@@ -61,7 +63,6 @@ typedef struct s_fork
 {
 	t_fork_state	*state;
 	pthread_mutex_t	*mutex;
-	size_t	*turn;
 }	t_fork;
 
 typedef struct s_data
@@ -83,8 +84,8 @@ typedef struct s_philo
 	t_data			*data;
 	t_fork			*fork_left;
 	t_fork			*fork_right;
-	size_t			meals_eaten_nb;
 	suseconds_t		last_time_eat;
+	size_t			meals_eaten_nb;
 	pthread_mutex_t	mutex_last_time_eat;
 	pthread_mutex_t	mutex_meals_eaten_nb;
 
