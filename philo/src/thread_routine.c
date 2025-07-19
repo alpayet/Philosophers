@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 03:21:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/18 09:59:19 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/19 04:16:49 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,22 +47,22 @@ t_return	wait_all_philos(t_philo *philo)
 	return (RETURN_SUCESS);
 }
 
-t_return	usleep_check(t_philo *philo, suseconds_t sleep_time)
+t_return	usleep_check(t_philo *philo, milliseconds_t sleep_time)
 {
 	struct timeval tv;
-	suseconds_t begin_time;
-	suseconds_t current_time;
-	suseconds_t elapsed_time;
+	milliseconds_t begin_time;
+	milliseconds_t current_time;
+	milliseconds_t elapsed_time;
 
 	gettimeofday(&tv, NULL);
-	begin_time = tv.tv_sec * 1000000 + tv.tv_usec;
+	begin_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 	elapsed_time = 0;
 	while (elapsed_time < sleep_time)
 	{
 		if (is_simulation_ended(philo) == true)
 			return (END_OF_SIMULATION);
 		gettimeofday(&tv, NULL);
-		current_time = tv.tv_sec * 1000000 + tv.tv_usec;
+		current_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 		elapsed_time = current_time - begin_time;
 		usleep(500);
 	}
@@ -74,7 +74,7 @@ t_return	philo_log(t_philo *philo, char *str)
 	if (is_simulation_ended(philo) == true)
 		return (END_OF_SIMULATION);
 	pthread_mutex_lock(&(philo->data->mutex_timestamp));
-	printf("%ld %zu %s", philo->data->timestamp / 1000, philo->philo_id, str);
+	printf("%ld %zu %s", philo->data->timestamp, philo->philo_id, str);
 	pthread_mutex_unlock(&(philo->data->mutex_timestamp));
 	return (RETURN_SUCESS);
 }
@@ -154,7 +154,7 @@ t_return	philo_eating(t_philo *philo)
 
 	pthread_mutex_lock(&(philo->mutex_last_time_eat));
 	gettimeofday(&tv, NULL);
-	philo->last_time_eat = tv.tv_sec * 1000000 + tv.tv_usec;
+	philo->last_time_eat = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 	pthread_mutex_unlock(&(philo->mutex_last_time_eat));
 	if (philo_log(philo, PHILO_EATING_MSG) == END_OF_SIMULATION)
 		return (END_OF_SIMULATION);
@@ -180,10 +180,8 @@ void	*thread_odd_routine(void *arg)
 	philo = (t_philo *)arg;
 	if (wait_all_philos(philo) == END_OF_SIMULATION)
 		return(NULL);
-	while (1)
+	while (is_simulation_ended(philo) == false)
 	{
-		if (is_simulation_ended(philo) == true)
-			return (NULL);
 		return_status = philo_odd_takes_forks(philo);
 		if (return_status == END_OF_SIMULATION)
 			return (NULL);
@@ -199,6 +197,7 @@ void	*thread_odd_routine(void *arg)
 		if (philo_thinking(philo) == END_OF_SIMULATION)
 			return (NULL);
 	}
+	return (NULL);
 }
 
 void	*thread_even_routine(void *arg)
@@ -210,10 +209,8 @@ void	*thread_even_routine(void *arg)
 	if (wait_all_philos(philo) == END_OF_SIMULATION)
 		return(NULL);
 	usleep_check(philo, philo->data->time_to_eat);
-	while (1)
+	while (is_simulation_ended(philo) == false)
 	{
-		if (is_simulation_ended(philo) == true)
-			return (NULL);
 		return_status = philo_even_takes_forks(philo);
 		if (return_status == END_OF_SIMULATION)
 			return (NULL);
@@ -229,4 +226,5 @@ void	*thread_even_routine(void *arg)
 		if (philo_thinking(philo) == END_OF_SIMULATION)
 			return (NULL);
 	}
+	return (NULL);
 }
