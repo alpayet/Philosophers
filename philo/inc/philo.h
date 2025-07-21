@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/19 03:33:04 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/21 00:30:16 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,12 @@
 # define PHILO_DEAD_MSG "died\n"
 
 //Milliseconds.
-typedef long milliseconds_t;
+typedef int64_t milliseconds_t;
 
 typedef enum e_return
 {
 	END_OF_SIMULATION,
-	RETURN_SUCESS,
+	RETURN_SUCCESS,
 	RETURN_FAILURE
 }	t_return;
 
@@ -60,11 +60,12 @@ typedef struct s_fork
 
 typedef struct s_data
 {
+	size_t			philo_nb;
 	milliseconds_t	time_to_eat;
 	milliseconds_t	time_to_die;
 	milliseconds_t	time_to_sleep;
 	milliseconds_t	timestamp;
-	bool			start_of_simulation;
+	milliseconds_t	simulation_start_time;
 	bool			end_of_simulation;
 	pthread_mutex_t	mutex_timestamp;
 	pthread_mutex_t	mutex_simulation_start;
@@ -79,14 +80,15 @@ typedef struct s_philo
 	t_fork			*fork_left;
 	t_fork			*fork_right;
 	milliseconds_t		last_time_eat;
-	ssize_t			meals_eaten_nb;
+	ssize_t			meals_count;
 	pthread_mutex_t	mutex_last_time_eat;
-	pthread_mutex_t	mutex_meals_eaten_nb;
+	pthread_mutex_t	mutex_meals_count;
 
 }	t_philo;
 
 t_return	philo_log(t_philo *philo, char *str);
 void		*thread_even_routine(void *arg);
 void		*thread_odd_routine(void *arg);
+milliseconds_t	get_current_time_in_ms(void);
 
 #endif

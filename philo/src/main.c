@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/19 04:11:30 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/21 00:30:27 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ t_fork	*create_forks(size_t fork_nb)
 void	destroy_one_philo_mutexes(t_philo *philo)
 {
 	pthread_mutex_destroy(&(philo->mutex_last_time_eat));
-	pthread_mutex_destroy(&(philo->mutex_meals_eaten_nb));
+	pthread_mutex_destroy(&(philo->mutex_meals_count));
 }
 
 void	destroy_philos_mutexes(size_t philo_nb, t_philo *philos)
@@ -133,12 +133,12 @@ void	destroy_philos_mutexes(size_t philo_nb, t_philo *philos)
 	}
 }
 
-void cleanup_threads(size_t threads_nb, t_philo *philos)
+void cleanup_threads(size_t thread_nb, t_philo *philos)
 {
 	size_t i;
 
 	i = 0;
-	while (i < threads_nb)
+	while (i < thread_nb)
 	{
 		pthread_join(philos[i].thread_id, NULL);
 		i++;
@@ -149,7 +149,7 @@ bool	init_philo_mutexes(t_philo *philo)
 {
 	if (pthread_mutex_init(&(philo->mutex_last_time_eat), NULL) != 0)
 		return (false);
-	if (pthread_mutex_init(&(philo->mutex_meals_eaten_nb), NULL) != 0)
+	if (pthread_mutex_init(&(philo->mutex_meals_count), NULL) != 0)
 	{
 		pthread_mutex_destroy(&(philo->mutex_last_time_eat));
 		return (false);
@@ -175,10 +175,10 @@ void	init_philo_config(t_philo *philos, size_t index, t_data *data)
 {
 	philos[index].philo_id = index + 1;
 	philos[index].data = data;
-	philos[index].meals_eaten_nb = 0;
+	philos[index].meals_count = 0;
 }
 
-bool	creat_philo_thread(t_philo *philo, size_t philo_nb)
+bool	creat_philo_thread(t_philo *philo)
 {
 	void	*(*routine)(void *arg);
 
@@ -190,12 +190,6 @@ bool	creat_philo_thread(t_philo *philo, size_t philo_nb)
 	{
 		finishing_simulation(philo->data);
 		return (false);
-	}
-	if (philo->philo_id == philo_nb)
-	{
-		pthread_mutex_lock(&(philo->data->mutex_simulation_start));
-		philo->data->start_of_simulation = true;
-		pthread_mutex_unlock(&(philo->data->mutex_simulation_start));
 	}
 	return (true);
 }
@@ -218,7 +212,7 @@ t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 			print_error(ERROR_MUTEX_INIT);
 			return (cleanup_philos_return_null(i, philos));
 		}
-		if (creat_philo_thread(&(philos[i]), philo_nb) == false)
+		if (creat_philo_thread(&(philos[i])) == false)
 		{
 			print_error(ERROR_THREAD_CREATE);
 			destroy_one_philo_mutexes(&(philos[i]));
@@ -227,23 +221,6 @@ t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 		i++;
 	}
 	return (philos);
-}
-
-void	cleanup_mutexes_and_threads(size_t threads_nb, t_fork *forks,
-	t_data *data, t_philo *philos)
-{
-	if (forks == NULL)
-		return ;
-	destroy_forks_mutex(threads_nb, forks);
-	if (data == NULL)
-		return ;
-	pthread_mutex_destroy(&(data->mutex_timestamp));
-	pthread_mutex_destroy(&(data->mutex_simulation_start));
-	pthread_mutex_destroy(&(data->mutex_simulation_end));
-	if (philos == NULL)
-		return ;
-	destroy_philos_mutexes(threads_nb, philos);
-	cleanup_threads(threads_nb, philos);
 }
 
 bool	init_data_mutexes(t_data *data)
@@ -271,79 +248,120 @@ bool	init_data_mutexes(t_data *data)
 
 bool	init_data(t_data *data, long argv_long[5])
 {
+	data->philo_nb = argv_long[0];
 	data->time_to_die = argv_long[1];
 	data->time_to_eat = argv_long[2];
 	data->time_to_sleep = argv_long[3];
 	data->timestamp = 0;
-	data->start_of_simulation = false;
+	data->simulation_start_time = -1;
 	data->end_of_simulation = false;
 	if (init_data_mutexes(data) == false)
 		return (false);
 	return (true);
 }
 
-void	monitor_philos(size_t philo_nb, t_philo *philos, ssize_t min_meals_eaten_nb)
+milliseconds_t	get_current_time_in_ms(void)
 {
 	struct timeval tv;
-	milliseconds_t simulation_start_time;
-	milliseconds_t current_time;
-	size_t i;
 
 	gettimeofday(&tv, NULL);
-	simulation_start_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+void	update_timestamp(t_data *data, milliseconds_t simulation_start_time, milliseconds_t current_time)
+{
+	pthread_mutex_lock(&(data->mutex_timestamp));
+	data->timestamp = current_time - simulation_start_time;
+	pthread_mutex_unlock(&(data->mutex_timestamp));
+}
+
+t_return	check_philos_last_meal(size_t philo_nb, t_philo *philos, milliseconds_t current_time)
+{
+	size_t i;
+
+	i = 0;
+	while (i < philo_nb)
+	{
+		pthread_mutex_lock(&(philos[i].mutex_last_time_eat));
+		if (current_time - philos[i].last_time_eat >= philos[i].data->time_to_die)
+		{
+			pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
+			philo_log(&(philos[i]), PHILO_DEAD_MSG);
+			finishing_simulation(philos->data);
+			return (END_OF_SIMULATION);
+		}
+		pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
+		i++;
+	}
+	return (RETURN_SUCCESS);
+}
+
+t_return	check_philos_meals_count(size_t philo_nb, t_philo *philos, ssize_t min_meals_count)
+{
+	size_t i;
+
+	i = 0;
+	while (i < philo_nb)
+	{
+		pthread_mutex_lock(&(philos[i].mutex_meals_count));
+		if (philos[i].meals_count < min_meals_count)
+		{
+			pthread_mutex_unlock(&(philos[i].mutex_meals_count));
+			break ;
+		}
+		pthread_mutex_unlock(&(philos[i].mutex_meals_count));
+		i++;
+	}
+	if (i == philo_nb)
+	{
+		finishing_simulation(philos->data);
+		return (END_OF_SIMULATION);
+	}
+	return (RETURN_SUCCESS);
+}
+
+void	monitor_philos(size_t philo_nb, t_philo *philos, ssize_t min_meals_count)
+{
+	milliseconds_t simulation_start_time;
+	milliseconds_t current_time;
+
+	pthread_mutex_lock(&(philos->data->mutex_simulation_start));
+	simulation_start_time = philos->data->simulation_start_time;
+	pthread_mutex_unlock(&(philos->data->mutex_simulation_start));
 	while (1)
 	{
-		gettimeofday(&tv, NULL);
-		current_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
-		pthread_mutex_lock(&(philos->data->mutex_timestamp));
-		philos->data->timestamp = current_time - simulation_start_time;
-		pthread_mutex_unlock(&(philos->data->mutex_timestamp));
-		i = 0;
-		while (i < philo_nb)
-		{
-			pthread_mutex_lock(&(philos[i].mutex_last_time_eat));
-			if (current_time - philos[i].last_time_eat >= philos->data->time_to_die)
-			{
-				pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
-				philo_log(&(philos[i]), PHILO_DEAD_MSG);
-				finishing_simulation(philos->data);
-				return;
-			}
-			pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
-			i++;
-		}
-		if (min_meals_eaten_nb != -1)
-		{
-			i = 0;
-			while (i < philo_nb)
-			{
-				pthread_mutex_lock(&(philos[i].mutex_meals_eaten_nb));
-				if (philos[i].meals_eaten_nb < min_meals_eaten_nb)
-				{
-					pthread_mutex_unlock(&(philos[i].mutex_meals_eaten_nb));
-					break ;
-				}
-				pthread_mutex_unlock(&(philos[i].mutex_meals_eaten_nb));
-				i++;
-			}
-			if (i == philo_nb)
-			{
-				finishing_simulation(philos->data);
-				return ;
-			}
-		}
+		current_time = get_current_time_in_ms();
+		update_timestamp(philos->data, simulation_start_time, current_time);
+		if (check_philos_last_meal(philo_nb,
+			philos, current_time) == END_OF_SIMULATION)
+			return ;
+		if (min_meals_count != -1 && check_philos_meals_count(philo_nb,
+				philos, min_meals_count) == END_OF_SIMULATION)
+			return ;
 		usleep(500);
 	}
 }
 
 void	full_cleanup(size_t	thread_nb, t_fork *forks, t_data *data, t_philo *philos)
 {
-	cleanup_mutexes_and_threads(thread_nb, forks, data, philos);
+	if (philos != NULL)
+	{
+		cleanup_threads(thread_nb, philos);
+		destroy_philos_mutexes(thread_nb, philos);
+	}
+	if (data != NULL)
+	{
+		pthread_mutex_destroy(&(data->mutex_timestamp));
+		pthread_mutex_destroy(&(data->mutex_simulation_start));
+		pthread_mutex_destroy(&(data->mutex_simulation_end));
+	}
+	if (forks != NULL)
+		destroy_forks_mutex(thread_nb, forks);
 	free(forks);
 	free(philos);
 }
 
-bool	argv_to_long(int argc, char **argv, long argv_long[4])
+bool	argv_to_long(int argc, char **argv, long argv_long[5])
 {
 	int	i;
 
@@ -368,18 +386,21 @@ bool	argv_to_long(int argc, char **argv, long argv_long[4])
 	return (true);
 }
 
-void	init_philos_last_time_eat(size_t philo_nd, t_philo *philos)
+void	start_the_simulation(size_t philo_nb, t_philo *philos)
 {
-	struct timeval tv;
+	milliseconds_t simulation_start_time;
 	size_t	i;
 
+	simulation_start_time = get_current_time_in_ms();
 	i = 0;
-	gettimeofday(&tv, NULL);
-	while (i < philo_nd)
+	while (i < philo_nb)
 	{
-		philos[i].last_time_eat = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+		philos[i].last_time_eat = simulation_start_time;
 		i++;
 	}
+	pthread_mutex_lock(&(philos->data->mutex_simulation_start));
+	philos->data->simulation_start_time = simulation_start_time;
+	pthread_mutex_unlock(&(philos->data->mutex_simulation_start));
 }
 
 int	main(int argc, char **argv)
@@ -405,7 +426,7 @@ int	main(int argc, char **argv)
 		full_cleanup(argv_long[0], forks, &data, NULL);
 		return (EXIT_FAILURE);
 	}
-	init_philos_last_time_eat(argv_long[0], philos);
+	start_the_simulation(argv_long[0], philos);
 	monitor_philos(argv_long[0], philos, argv_long[4]);
 	full_cleanup(argv_long[0], forks, &data, philos);
 	return (EXIT_SUCCESS);
