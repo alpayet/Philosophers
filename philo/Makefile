@@ -17,7 +17,7 @@ DEP = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.d))
 
 NAME = philo
 
-CC = cc -g3
+CC = cc
 THREAD_FLAGS = -pthread
 CFLAGS = -Wall -Wextra -Werror
 

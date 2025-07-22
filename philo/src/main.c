@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/21 00:30:27 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/21 22:39:16 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,22 @@
 
 long	atol_alt(char *nptr)
 {
+	int		sign;
 	size_t	n;
 
 	n = 0;
-	if (*nptr == '-')
-		return (-1);
-	if ( *nptr == '+' && nptr[1] != '\0')
+	sign = 1;
+	if ((*nptr == '-' || *nptr == '+') && nptr[1] != '\0')
+	{
+		if (*nptr == '-')
+			sign = -sign;
 		nptr++;
+	}
 	while (*nptr >= '0' && *nptr <= '9')
 	{
 		n = 10 * n + *nptr - '0';
-		if (n > LONG_MAX)
+		if ((sign == 1 && n > LONG_MAX)
+		|| (sign == -1 && n > (size_t)LONG_MAX + 1))
 			return (-1);
 		nptr++;
 	}
@@ -371,14 +376,9 @@ bool	argv_to_long(int argc, char **argv, long argv_long[5])
 	while (i < argc)
 	{
 		argv_long[i] = atol_alt(argv[i]);
-		if (argv_long[i] <= 0)
+		if (argv_long[i] < 0)
 		{
 			print_error(ERROR_BAD_ARGS);
-			return (false);
-		}
-		if (i == 0 && argv_long[i] >= NB_MAX_THREADS)
-		{
-			print_error(ERROR_MAX_THREADS);
 			return (false);
 		}
 		i++;
