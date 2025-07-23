@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/21 22:39:26 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/23 05:51:20 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ typedef struct s_data
 	milliseconds_t	time_to_eat;
 	milliseconds_t	time_to_die;
 	milliseconds_t	time_to_sleep;
+	ssize_t			min_meals_count;
 	milliseconds_t	timestamp;
 	milliseconds_t	simulation_start_time;
 	bool			end_of_simulation;

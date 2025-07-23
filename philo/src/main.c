@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/21 22:39:16 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/23 06:02:43 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,20 +46,6 @@ size_t	ft_strlen(char *str)
 	while (str[i])
 		i++;
 	return (i);
-}
-
-void	*ft_calloc(size_t nmemb, size_t size)
-{
-	void	*ptr;
-	if (nmemb == 0 || size == 0)
-		return (malloc(0));
-	if (nmemb > (SIZE_MAX / size))
-		return (NULL);
-	ptr = malloc(nmemb * size);
-	if (ptr == NULL)
-		return (NULL);
-	memset(ptr, 0, nmemb * size);
-	return (ptr);
 }
 
 void	print_error(char *str)
@@ -204,7 +190,7 @@ t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 	t_philo *philos;
 	size_t i;
 
-	philos = ft_calloc(philo_nb, sizeof(*philos));
+	philos = malloc(philo_nb * sizeof(*philos));
 	if (check_malloc(philos) == false)
 		return (NULL);
 	i = 0;
@@ -257,6 +243,7 @@ bool	init_data(t_data *data, long argv_long[5])
 	data->time_to_die = argv_long[1];
 	data->time_to_eat = argv_long[2];
 	data->time_to_sleep = argv_long[3];
+	data->min_meals_count = argv_long[4];
 	data->timestamp = 0;
 	data->simulation_start_time = -1;
 	data->end_of_simulation = false;
