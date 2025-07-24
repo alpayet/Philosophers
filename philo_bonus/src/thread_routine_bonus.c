@@ -6,11 +6,11 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 03:21:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/24 02:04:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/24 00:11:11 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "philo_bonus.h"
 
 bool	is_simulation_started(t_philo *philo)
 {
@@ -202,7 +202,7 @@ t_return	create_offset(t_philo *philo)
 
 void	*thread_even_routine(void *arg)
 {
-	t_philo	*philo;
+	t_philo *philo;
 
 	philo = (t_philo *)arg;
 	if (wait_all_philos(philo) == END_OF_SIMULATION)

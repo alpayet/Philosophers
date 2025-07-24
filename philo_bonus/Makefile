@@ -2,7 +2,9 @@
 
 #files
 SRC_FILES = \
-	main.c
+	main_bonus.c \
+	test.c \
+	thread_routine_bonus.c
 
 #directories
 SRC_DIR = src

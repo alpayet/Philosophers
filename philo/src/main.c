@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/23 06:02:43 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/24 00:53:42 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -288,7 +288,8 @@ t_return	check_philos_last_meal(size_t philo_nb, t_philo *philos, milliseconds_t
 	return (RETURN_SUCCESS);
 }
 
-t_return	check_philos_meals_count(size_t philo_nb, t_philo *philos, ssize_t min_meals_count)
+t_return	check_philos_meals_count(size_t philo_nb, t_philo *philos,
+	ssize_t min_meals_count)
 {
 	size_t i;
 
@@ -357,6 +358,11 @@ bool	argv_to_long(int argc, char **argv, long argv_long[5])
 {
 	int	i;
 
+	if (argc <= 3 || argc >= 6)
+	{
+		print_error(ERROR_ARGS_NB);
+		return (false);
+	}
 	if (argc == 4)
 		argv_long[4] = -1;
 	i = 0;

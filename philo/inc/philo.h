@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/23 05:51:20 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/24 00:53:55 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 # include <stdio.h>
 # include <pthread.h>
 
+# define ERROR_ARGS_NB "Error: Wrong number of arguments\n"
 # define ERROR_BAD_ARGS "Error: bad arguments\n"
 # define ERROR_MAX_THREADS "Error: too much threads\n"
 # define ERROR_MALLOC "Error: malloc\n"
