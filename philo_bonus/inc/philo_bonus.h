@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 08:38:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/24 00:52:48 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/25 08:36:18 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,11 @@
 # include <fcntl.h>
 # include <sys/stat.h>
 # include <semaphore.h>
+# include <signal.h>
 
 # define ALL_RW (S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
+# define ERROR_SEM_OPEN "Error : sem_open\n"
 # define ERROR_ARGS_NB "Error: Wrong number of arguments\n"
 # define ERROR_BAD_ARGS "Error: bad arguments\n"
 # define ERROR_MAX_THREADS "Error: too much threads\n"
@@ -70,31 +72,27 @@ typedef struct s_data
 	milliseconds_t	time_to_die;
 	milliseconds_t	time_to_sleep;
 	ssize_t			min_meals_count;
-	milliseconds_t	timestamp;
 	milliseconds_t	simulation_start_time;
 	bool			end_of_simulation;
-	pthread_mutex_t	mutex_timestamp;
-	pthread_mutex_t	mutex_simulation_start;
-	pthread_mutex_t	mutex_simulation_end;
+	sem_t			*sem_forks_nb;
+	sem_t			*sem_blocking;
+	sem_t			*sem_simulation_end;
+	sem_t			*mutex_forks_acquisition;
+	sem_t			*mutex_simulation_end;
 }	t_data;
 
 typedef struct s_philo
 {
 	size_t			philo_id;
-	pthread_t 		thread_id;
+	pid_t			*process_pid;
 	t_data			*data;
-	t_fork			*fork_left;
-	t_fork			*fork_right;
-	milliseconds_t		last_time_eat;
+	milliseconds_t	last_time_eat;
 	ssize_t			meals_count;
-	pthread_mutex_t	mutex_last_time_eat;
-	pthread_mutex_t	mutex_meals_count;
-
 }	t_philo;
 
-t_return	philo_log(t_philo *philo, char *str);
-void		*thread_even_routine(void *arg);
-void		*thread_odd_routine(void *arg);
+t_return		philo_log(t_philo *philo, char *str);
+void			*thread_even_routine(void *arg);
+void			*thread_odd_routine(void *arg);
 milliseconds_t	get_current_time_in_ms(void);
 
 #endif

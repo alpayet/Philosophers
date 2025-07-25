@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 03:21:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/24 02:04:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/25 08:47:37 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ t_return	wait_all_philos(t_philo *philo)
 t_return	usleep_check(t_philo *philo, milliseconds_t sleep_time)
 {
 	milliseconds_t begin_time;
-	milliseconds_t current_time;
 	milliseconds_t elapsed_time;
 
 	begin_time = get_current_time_in_ms();
@@ -59,8 +58,7 @@ t_return	usleep_check(t_philo *philo, milliseconds_t sleep_time)
 	{
 		if (is_simulation_ended(philo) == true)
 			return (END_OF_SIMULATION);
-		current_time = get_current_time_in_ms();
-		elapsed_time = current_time - begin_time;
+		elapsed_time = get_current_time_in_ms() - begin_time;
 		usleep(500);
 	}
 	return (RETURN_SUCCESS);
