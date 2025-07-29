@@ -6,13 +6,14 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 08:38:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/25 08:36:18 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/28 09:35:51 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILO_BONUS_H
 # define PHILO_BONUS_H
 
+# include <errno.h>
 # include <stdbool.h>
 # include <pthread.h>
 # include <sys/time.h>
@@ -24,6 +25,7 @@
 # include <stdio.h>
 # include <fcntl.h>
 # include <sys/stat.h>
+# include <sys/wait.h>
 # include <semaphore.h>
 # include <signal.h>
 
@@ -46,12 +48,18 @@
 //Milliseconds.
 typedef int64_t milliseconds_t;
 
-typedef enum e_return
+typedef enum e_error_type
+{
+	NO_ERROR,
+	MALLOC,
+	SEM_OPEN,
+}	t_error_type;
+
+typedef enum e_simulation_state
 {
 	END_OF_SIMULATION,
-	RETURN_SUCCESS,
-	RETURN_FAILURE
-}	t_return;
+	SIMULATION_CONTINUES,
+}	t_simulation_state;
 
 typedef enum e_fork_state
 {
@@ -63,36 +71,51 @@ typedef struct s_fork
 {
 	t_fork_state	state;
 	pthread_mutex_t	mutex;
+	t_error_type	error;
 }	t_fork;
+
+typedef struct s_named_sem
+{
+	sem_t	*ptr;
+	char	*name;
+	t_error_type	error;
+}	t_named_sem;
 
 typedef struct s_data
 {
-	size_t			philo_nb;
-	milliseconds_t	time_to_eat;
-	milliseconds_t	time_to_die;
-	milliseconds_t	time_to_sleep;
-	ssize_t			min_meals_count;
-	milliseconds_t	simulation_start_time;
-	bool			end_of_simulation;
-	sem_t			*sem_forks_nb;
-	sem_t			*sem_blocking;
-	sem_t			*sem_simulation_end;
-	sem_t			*mutex_forks_acquisition;
-	sem_t			*mutex_simulation_end;
+	size_t				philo_nb;
+	milliseconds_t		time_to_eat;
+	milliseconds_t		time_to_die;
+	milliseconds_t		time_to_sleep;
+	ssize_t				min_meals_count;
+	milliseconds_t		simulation_start_time;
+	t_named_sem	sem_forks_nb;
+	t_named_sem	mutex_forks_acquisition;
+	t_named_sem	mutex_print_access;
+	t_named_sem	sem_start_barrier;
+	t_named_sem	sem_end_barrier;
 }	t_data;
 
 typedef struct s_philo
 {
-	size_t			philo_id;
-	pid_t			*process_pid;
-	t_data			*data;
-	milliseconds_t	last_time_eat;
-	ssize_t			meals_count;
+	size_t				philo_id;
+	pid_t				process_pid;
+	t_data				*data;
+	milliseconds_t		last_time_eat;
+	ssize_t				meals_count;
+	bool				should_exit;
+	t_named_sem			mutex_should_exit;
+	t_named_sem			sem_thread_start_barrier;
+	t_named_sem			sem_thread_end_barrier;
 }	t_philo;
 
-t_return		philo_log(t_philo *philo, char *str);
-void			*thread_even_routine(void *arg);
-void			*thread_odd_routine(void *arg);
+size_t			ft_strlen(char *str);
+char			*ft_strdup(char *s);
+char			*ft_itoa(int n);
+char			*ft_strjoin(char *s1, char *s2);
+void			*thread_routine(void *arg);
+void			process_routine(t_philo *philo);
 milliseconds_t	get_current_time_in_ms(void);
+void	philo_log(t_philo *philo, char *str);
 
 #endif

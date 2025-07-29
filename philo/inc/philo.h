@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/24 00:53:55 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:17:30 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,8 @@ typedef int64_t milliseconds_t;
 typedef enum e_return
 {
 	END_OF_SIMULATION,
-	RETURN_SUCCESS,
-	RETURN_FAILURE
-}	t_return;
+	SIMULATION_CONTINUES,
+}	t_simulation_state;
 
 typedef enum e_fork_state
 {
@@ -69,6 +68,7 @@ typedef struct s_data
 	milliseconds_t	simulation_start_time;
 	bool			end_of_simulation;
 	pthread_mutex_t	mutex_timestamp;
+	pthread_mutex_t	mutex_print_access;
 	pthread_mutex_t	mutex_simulation_start;
 	pthread_mutex_t	mutex_simulation_end;
 }	t_data;
@@ -80,14 +80,14 @@ typedef struct s_philo
 	t_data			*data;
 	t_fork			*fork_left;
 	t_fork			*fork_right;
-	milliseconds_t		last_time_eat;
+	milliseconds_t	last_time_eat;
 	ssize_t			meals_count;
 	pthread_mutex_t	mutex_last_time_eat;
 	pthread_mutex_t	mutex_meals_count;
 
 }	t_philo;
 
-t_return	philo_log(t_philo *philo, char *str);
+t_simulation_state	philo_log(t_philo *philo, char *str);
 void		*thread_even_routine(void *arg);
 void		*thread_odd_routine(void *arg);
 milliseconds_t	get_current_time_in_ms(void);

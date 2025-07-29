@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/24 00:53:42 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/07/27 23:17:07 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,16 @@ long	atol_alt(char *nptr)
 	int		sign;
 	size_t	n;
 
-	n = 0;
+	if (*nptr == '\0')
+		return (-1);
 	sign = 1;
 	if ((*nptr == '-' || *nptr == '+') && nptr[1] != '\0')
 	{
 		if (*nptr == '-')
-			sign = -sign;
+		sign = -sign;
 		nptr++;
 	}
+	n = 0;
 	while (*nptr >= '0' && *nptr <= '9')
 	{
 		n = 10 * n + *nptr - '0';
@@ -63,7 +65,7 @@ bool	check_malloc(void *ptr)
 	return (true);
 }
 
-void	finishing_simulation(t_data *data)
+void	end_the_simulation(t_data *data)
 {
 	pthread_mutex_lock(&(data->mutex_simulation_end));
 	data->end_of_simulation = true;
@@ -179,7 +181,7 @@ bool	creat_philo_thread(t_philo *philo)
 		routine = thread_odd_routine;
 	if (pthread_create(&(philo->thread_id), NULL, routine, philo) != 0)
 	{
-		finishing_simulation(philo->data);
+		end_the_simulation(philo->data);
 		return (false);
 	}
 	return (true);
@@ -267,7 +269,7 @@ void	update_timestamp(t_data *data, milliseconds_t simulation_start_time, millis
 	pthread_mutex_unlock(&(data->mutex_timestamp));
 }
 
-t_return	check_philos_last_meal(size_t philo_nb, t_philo *philos, milliseconds_t current_time)
+t_simulation_state	check_philos_last_meal(size_t philo_nb, t_philo *philos, milliseconds_t current_time)
 {
 	size_t i;
 
@@ -279,16 +281,16 @@ t_return	check_philos_last_meal(size_t philo_nb, t_philo *philos, milliseconds_t
 		{
 			pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
 			philo_log(&(philos[i]), PHILO_DEAD_MSG);
-			finishing_simulation(philos->data);
+			end_the_simulation(philos->data);
 			return (END_OF_SIMULATION);
 		}
 		pthread_mutex_unlock(&(philos[i].mutex_last_time_eat));
 		i++;
 	}
-	return (RETURN_SUCCESS);
+	return (SIMULATION_CONTINUES);
 }
 
-t_return	check_philos_meals_count(size_t philo_nb, t_philo *philos,
+t_simulation_state	check_philos_meals_count(size_t philo_nb, t_philo *philos,
 	ssize_t min_meals_count)
 {
 	size_t i;
@@ -307,10 +309,10 @@ t_return	check_philos_meals_count(size_t philo_nb, t_philo *philos,
 	}
 	if (i == philo_nb)
 	{
-		finishing_simulation(philos->data);
+		end_the_simulation(philos->data);
 		return (END_OF_SIMULATION);
 	}
-	return (RETURN_SUCCESS);
+	return (SIMULATION_CONTINUES);
 }
 
 void	monitor_philos(size_t philo_nb, t_philo *philos, ssize_t min_meals_count)

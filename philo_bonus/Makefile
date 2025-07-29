@@ -3,8 +3,8 @@
 #files
 SRC_FILES = \
 	main_bonus.c \
-	test.c \
-	thread_routine_bonus.c
+	utils_bonus.c \
+	process_routine_bonus.c
 
 #directories
 SRC_DIR = src
@@ -20,7 +20,7 @@ NAME = philo_bonus
 
 CC = cc
 THREAD_FLAGS = -pthread
-CFLAGS = -Wall -Wextra
+CFLAGS = -Wall -Wextra -Werror
 
 DEBUG_VALGRIND = valgrind --leak-check=full --show-leak-kinds=all -s
 
