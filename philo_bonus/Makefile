@@ -3,8 +3,25 @@
 #files
 SRC_FILES = \
 	main_bonus.c \
-	utils_bonus.c \
-	process_routine_bonus.c
+	main_process/cleanup.c \
+	main_process/create_philos.c \
+	main_process/init_data.c \
+	main_process/philos_meals.c \
+	main_process/secur_sem_open.c \
+	main_process/start_end_simulation.c \
+	childs_process/child_thread_routine.c \
+	childs_process/philo_actions.c \
+	childs_process/philo_log.c \
+	childs_process/philo_managing_forks.c \
+	childs_process/process_routine.c \
+	childs_process/simulation_check.c \
+	utils/atol_alt.c \
+	utils/ft_calloc.c \
+	utils/ft_itoa.c \
+	utils/ft_strdup.c \
+	utils/ft_strjoin.c \
+	utils/ft_strlen.c \
+	utils/misc.c \
 
 #directories
 SRC_DIR = src
@@ -18,7 +35,7 @@ DEP = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.d))
 
 NAME = philo_bonus
 
-CC = cc
+CC = cc -g3
 THREAD_FLAGS = -pthread
 CFLAGS = -Wall -Wextra -Werror
 

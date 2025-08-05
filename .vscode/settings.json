@@ -58,6 +58,9 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "unistd.h": "c",
-    "cstdlib": "c"
+    "cstdlib": "c",
+    "typeinfo": "c",
+    "philo.h": "c",
+    "stdio.h": "c"
   }
 }
