@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 16:10:15 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/31 01:38:52 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:56:58 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,23 +31,18 @@ bool	init_data(t_data *data, long argv_long[5])
 
 static bool	init_data_mutexes(t_data *data)
 {
-	if (pthread_mutex_init(&(data->mutex_timestamp), NULL) != 0)
+	if (pthread_mutex_init(&(data->timestamp_mutex), NULL) != 0)
+		return (print_error(ERROR_MUTEX_INIT));
+	if (pthread_mutex_init(&(data->simulation_start_mutex), NULL) != 0)
 	{
-		print_error(ERROR_MUTEX_INIT);
-		return (false);
+		pthread_mutex_destroy(&(data->timestamp_mutex));
+		return (print_error(ERROR_MUTEX_INIT));
 	}
-	if (pthread_mutex_init(&(data->mutex_simulation_start), NULL) != 0)
+	if (pthread_mutex_init(&(data->simulation_end_mutex), NULL) != 0)
 	{
-		print_error(ERROR_MUTEX_INIT);
-		pthread_mutex_destroy(&(data->mutex_timestamp));
-		return (false);
-	}
-	if (pthread_mutex_init(&(data->mutex_simulation_end), NULL) != 0)
-	{
-		print_error(ERROR_MUTEX_INIT);
-		pthread_mutex_destroy(&(data->mutex_timestamp));
-		pthread_mutex_destroy(&(data->mutex_simulation_start));
-		return (false);
+		pthread_mutex_destroy(&(data->timestamp_mutex));
+		pthread_mutex_destroy(&(data->simulation_start_mutex));
+		return (print_error(ERROR_MUTEX_INIT));
 	}
 	return (true);
 }

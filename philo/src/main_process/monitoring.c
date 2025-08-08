@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 11:53:28 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:44:01 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/08 00:16:44 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,9 @@ void	monitor_philos(size_t philo_nb, t_philo *philos,
 	t_milliseconds	simulation_start_time;
 	t_milliseconds	current_time;
 
-	pthread_mutex_lock(&(philos->data->mutex_simulation_start));
+	pthread_mutex_lock(&(philos->data->simulation_start_mutex));
 	simulation_start_time = philos->data->simulation_start_time;
-	pthread_mutex_unlock(&(philos->data->mutex_simulation_start));
+	pthread_mutex_unlock(&(philos->data->simulation_start_mutex));
 	while (1)
 	{
 		current_time = get_current_time_in_ms();
@@ -36,7 +36,8 @@ void	monitor_philos(size_t philo_nb, t_philo *philos,
 		if (check_philos_last_meal(philo_nb,
 				philos, current_time) == END_OF_SIMULATION)
 			return ;
-		if (min_meals_count != -1 && check_philos_meals_count(philo_nb,
+		if (min_meals_count != -1
+			&& check_philos_meals_count(philo_nb,
 				philos, min_meals_count) == END_OF_SIMULATION)
 			return ;
 		usleep(500);
@@ -46,9 +47,9 @@ void	monitor_philos(size_t philo_nb, t_philo *philos,
 static void	update_timestamp(t_data *data, t_milliseconds simulation_start_time,
 	t_milliseconds current_time)
 {
-	pthread_mutex_lock(&(data->mutex_timestamp));
+	pthread_mutex_lock(&(data->timestamp_mutex));
 	data->timestamp = current_time - simulation_start_time;
-	pthread_mutex_unlock(&(data->mutex_timestamp));
+	pthread_mutex_unlock(&(data->timestamp_mutex));
 }
 
 static t_sim_state	check_philos_last_meal(size_t philo_nb,

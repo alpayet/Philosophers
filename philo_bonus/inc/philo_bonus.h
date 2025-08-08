@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 08:38:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 17:54:07 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/08 13:47:22 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,20 @@
 # include <unistd.h>
 # include <stdlib.h>
 
+# define MAX_THREAD_NB 300
+# define ERROR_ARGS_NB "Error: Wrong number of arguments\n"
+# define ERROR_THREAD_NB "Error: Wrong number of threads\n"
+# define ERROR_BAD_ARGS "Error: bad arguments\n"
+# define ERROR_MALLOC "Error: malloc\n"
+# define ERROR_THREAD_CREATE "Error: thread_create_init\n"
+# define ERROR_SEM_OPEN "Error: sem_open\n"
+
+# define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
+# define PHILO_EATING_MSG "is eating\n"
+# define PHILO_SLEEPING_MSG "is sleeping\n"
+# define PHILO_THINKING_MSG "is thinking\n"
+# define PHILO_DEAD_MSG "died\n"
+
 # define SEM_FILE_FORKS_AQUISITION_MUTEX "/forks_acquisition_mutex"
 # define SEM_FILE_FORKS_NB "/forks_nb"
 # define SEM_FILE_MIN_MEALS_COUNT_BARRIER "/min_meals_count_barrier"
@@ -29,20 +43,6 @@
 # define SEM_FILE_SHOULD_EXIT_MUTEX "/should_exit_mutex"
 # define SEM_FILE_THREAD_START_BARRIER "/thread_start_barrier"
 # define SEM_FILE_THREAD_END_BARRIER "/thread_end_barrier"
-
-# define MAX_THREAD_NB 300
-# define ERROR_ARGS_NB "Error: Wrong number of arguments\n"
-# define ERROR_THREAD_NB "Error: Wrong number of threads\n"
-# define ERROR_BAD_ARGS "Error: bad arguments\n"
-# define ERROR_SEM_OPEN "Error : sem_open\n"
-# define ERROR_MALLOC "Error: malloc\n"
-# define ERROR_THREAD_CREATE "Error: thread_create_init\n"
-
-# define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
-# define PHILO_EATING_MSG "is eating\n"
-# define PHILO_SLEEPING_MSG "is sleeping\n"
-# define PHILO_THINKING_MSG "is thinking\n"
-# define PHILO_DEAD_MSG "died\n"
 
 //Milliseconds.
 typedef int64_t	t_milliseconds;
@@ -76,31 +76,32 @@ typedef struct s_data
 	ssize_t				min_meals_count;
 	t_milliseconds		simulation_start_time;
 	t_named_sem			sem_forks_nb;
-	t_named_sem			mutex_forks_acquisition;
+	t_named_sem			forks_acquisition_mutex;
 	t_named_sem			min_meals_count_barrier;
-	t_named_sem			mutex_print_access;
+	t_named_sem			print_access_mutex;
 	t_named_sem			sem_start_barrier;
 	t_named_sem			sem_end_barrier;
+	t_named_sem			sem_threads_start_barrier;
+	t_named_sem			sem_threads_end_barrier;
 }	t_data;
 
 typedef struct s_philo
 {
+	t_data				*data;
 	size_t				philo_id;
 	pid_t				process_pid;
-	t_data				*data;
 	t_milliseconds		last_time_eat;
 	ssize_t				meals_count;
 	bool				should_exit;
-	t_named_sem			mutex_should_exit;
-	t_named_sem			sem_thread_start_barrier;
-	t_named_sem			sem_thread_end_barrier;
+	t_named_sem			should_exit_mutex;
 }	t_philo;
 
 //MAIN_PROCESS
 
 t_named_sem		open_new_sem_file(char *name, size_t counter);
 void			start_the_simulation(size_t philo_nb, sem_t *sem_start_barrier);
-void			end_the_simulation(size_t philo_nb, t_philo *philos);
+void			end_the_simulation(size_t philo_nb, t_data *data);
+int				wait_philos(size_t philo_nb, t_philo *philos);
 void			full_cleanup(size_t philo_nb, t_data *data, t_philo *philos);
 
 // CHILDS_PROCESS
@@ -119,7 +120,7 @@ char			*ft_strdup(char *s);
 char			*ft_itoa(int n);
 void			*ft_calloc(size_t nmemb, size_t size);
 char			*ft_strjoin(char *s1, char *s2);
-void			print_error(char *str);
+bool			print_error(char *str);
 bool			check_malloc(void *ptr);
 t_milliseconds	get_current_time_in_ms(void);
 

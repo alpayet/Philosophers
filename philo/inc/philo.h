@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 17:49:53 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:49:13 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@
 # define ERROR_THREAD_NB "Error: Wrong number of threads\n"
 # define ERROR_BAD_ARGS "Error: bad arguments\n"
 # define ERROR_MALLOC "Error: malloc\n"
-# define ERROR_MUTEX_INIT "Error: mutex_init\n"
 # define ERROR_THREAD_CREATE "Error: thread_create_init\n"
+# define ERROR_MUTEX_INIT "Error: mutex_init\n"
 
 # define PHILO_TAKEN_FORK_MSG "has taken a fork\n"
 # define PHILO_EATING_MSG "is eating\n"
@@ -64,17 +64,17 @@ typedef struct s_data
 	t_milliseconds	timestamp;
 	t_milliseconds	simulation_start_time;
 	bool			end_of_simulation;
-	pthread_mutex_t	mutex_timestamp;
-	pthread_mutex_t	mutex_print_access;
-	pthread_mutex_t	mutex_simulation_start;
-	pthread_mutex_t	mutex_simulation_end;
+	pthread_mutex_t	timestamp_mutex;
+	pthread_mutex_t	print_access_mutex;
+	pthread_mutex_t	simulation_start_mutex;
+	pthread_mutex_t	simulation_end_mutex;
 }	t_data;
 
 typedef struct s_philo
 {
+	t_data			*data;
 	size_t			philo_id;
 	pthread_t		thread_id;
-	t_data			*data;
 	t_fork			*fork_left;
 	t_fork			*fork_right;
 	t_milliseconds	last_time_eat;
@@ -102,7 +102,7 @@ t_sim_state		usleep_check(t_philo *philo, t_milliseconds sleep_time);
 
 size_t			ft_strlen(char *str);
 long			atol_alt(char *nptr);
-void			print_error(char *str);
+bool			print_error(char *str);
 bool			check_malloc(void *ptr);
 t_milliseconds	get_current_time_in_ms(void);
 

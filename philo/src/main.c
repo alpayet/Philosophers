@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 17:51:51 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:54:49 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,10 +54,7 @@ static bool	argv_to_long(int argc, char **argv, long argv_long[5])
 	int	i;
 
 	if (argc <= 3 || argc >= 6)
-	{
-		print_error(ERROR_ARGS_NB);
-		return (false);
-	}
+		return (print_error(ERROR_ARGS_NB));
 	if (argc == 4)
 		argv_long[4] = -1;
 	i = 0;
@@ -65,15 +62,9 @@ static bool	argv_to_long(int argc, char **argv, long argv_long[5])
 	{
 		argv_long[i] = atol_alt(argv[i]);
 		if (i == 0 && (argv_long[i] == 0 || argv_long[i] > MAX_THREAD_NB))
-		{
-			print_error(ERROR_THREAD_NB);
-			return (false);
-		}
+			return (print_error(ERROR_THREAD_NB));
 		if (argv_long[i] < 0)
-		{
-			print_error(ERROR_BAD_ARGS);
-			return (false);
-		}
+			return (print_error(ERROR_BAD_ARGS));
 		i++;
 	}
 	return (true);

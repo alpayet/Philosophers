@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 16:40:32 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:05:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:45:46 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,25 +27,25 @@ t_sim_state	wait_all_philos(t_philo *philo)
 
 static bool	is_simulation_started(t_philo *philo)
 {
-	pthread_mutex_lock(&(philo->data->mutex_simulation_start));
+	pthread_mutex_lock(&(philo->data->simulation_start_mutex));
 	if (philo->data->simulation_start_time != -1)
 	{
-		pthread_mutex_unlock(&(philo->data->mutex_simulation_start));
+		pthread_mutex_unlock(&(philo->data->simulation_start_mutex));
 		return (true);
 	}
-	pthread_mutex_unlock(&(philo->data->mutex_simulation_start));
+	pthread_mutex_unlock(&(philo->data->simulation_start_mutex));
 	return (false);
 }
 
 bool	is_simulation_ended(t_philo *philo)
 {
-	pthread_mutex_lock(&(philo->data->mutex_simulation_end));
+	pthread_mutex_lock(&(philo->data->simulation_end_mutex));
 	if (philo->data->end_of_simulation == true)
 	{
-		pthread_mutex_unlock(&(philo->data->mutex_simulation_end));
+		pthread_mutex_unlock(&(philo->data->simulation_end_mutex));
 		return (true);
 	}
-	pthread_mutex_unlock(&(philo->data->mutex_simulation_end));
+	pthread_mutex_unlock(&(philo->data->simulation_end_mutex));
 	return (false);
 }
 

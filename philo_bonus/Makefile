@@ -6,10 +6,11 @@ SRC_FILES = \
 	main_process/cleanup.c \
 	main_process/create_philos.c \
 	main_process/init_data.c \
-	main_process/philos_meals.c \
+	main_process/wait_philos.c \
+	main_process/trigger_ending.c \
 	main_process/secur_sem_open.c \
 	main_process/start_end_simulation.c \
-	childs_process/child_thread_routine.c \
+	childs_process/child_thread_routines.c \
 	childs_process/philo_actions.c \
 	childs_process/philo_log.c \
 	childs_process/philo_managing_forks.c \

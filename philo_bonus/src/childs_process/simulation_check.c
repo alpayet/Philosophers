@@ -6,53 +6,35 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 20:36:22 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:05:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:41:53 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 
-static void	abort_check_meal_in_main(size_t philo_nb,
-				sem_t *min_meals_count_barrier);
+void	trigger_the_end(t_data *data);
 
 t_sim_state	monitor_simulation(t_philo *philo, char *str)
 {
-	sem_wait(philo->data->mutex_print_access.ptr);
-	sem_wait(philo->mutex_should_exit.ptr);
+	sem_wait(philo->data->print_access_mutex.ptr);
+	sem_wait(philo->should_exit_mutex.ptr);
 	if (philo->should_exit == true)
 	{
-		sem_post(philo->mutex_should_exit.ptr);
-		sem_post(philo->data->mutex_print_access.ptr);
+		sem_post(philo->should_exit_mutex.ptr);
+		sem_post(philo->data->print_access_mutex.ptr);
 		return (END_OF_SIMULATION);
 	}
-	sem_post(philo->mutex_should_exit.ptr);
+	sem_post(philo->should_exit_mutex.ptr);
 	if (get_current_time_in_ms() - philo->last_time_eat
 		>= philo->data->time_to_die)
 	{
 		philo_log(philo, PHILO_DEAD_MSG);
-		if (philo->data->min_meals_count == -1)
-			sem_post(philo->data->sem_end_barrier.ptr);
-		else
-			abort_check_meal_in_main(philo->data->philo_nb,
-				philo->data->min_meals_count_barrier.ptr);
+		trigger_the_end(philo->data);
 		return (END_OF_SIMULATION);
 	}
 	philo_log(philo, str);
-	sem_post(philo->data->mutex_print_access.ptr);
+	sem_post(philo->data->print_access_mutex.ptr);
 	return (SIMULATION_CONTINUES);
-}
-
-static void	abort_check_meal_in_main(size_t philo_nb,
-				sem_t *min_meals_count_barrier)
-{
-	size_t	i;
-
-	i = 0;
-	while (i < philo_nb)
-	{
-		sem_post(min_meals_count_barrier);
-		i++;
-	}
 }
 
 t_sim_state	usleep_check(t_philo *philo, t_milliseconds sleep_time)

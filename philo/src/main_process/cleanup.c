@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 11:55:48 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/31 01:36:34 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:45:46 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,9 +27,9 @@ void	full_cleanup(size_t	thread_nb, t_fork *forks,
 	}
 	if (data != NULL)
 	{
-		pthread_mutex_destroy(&(data->mutex_timestamp));
-		pthread_mutex_destroy(&(data->mutex_simulation_start));
-		pthread_mutex_destroy(&(data->mutex_simulation_end));
+		pthread_mutex_destroy(&(data->timestamp_mutex));
+		pthread_mutex_destroy(&(data->simulation_start_mutex));
+		pthread_mutex_destroy(&(data->simulation_end_mutex));
 	}
 	if (forks != NULL)
 		destroy_forks_mutex(thread_nb, forks);

@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/04 16:10:48 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/08 01:03:15 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static bool	argv_to_long(int argc, char **argv, long argv_long[5]);
 bool		init_data(t_data *data, long argv_long[5]);
 t_philo		*create_philos(size_t philo_nb, t_data *data);
 void		start_the_simulation(size_t philo_nb, sem_t *sem_start_barrier);
-void		check_philos_meals(size_t philo_nb, sem_t *sem_start_barrier);
+void		wait_trigger_ending(long argv_long[5], t_data *data);
 
 int	main(int argc, char **argv)
 {
@@ -37,11 +37,13 @@ int	main(int argc, char **argv)
 		return (EXIT_FAILURE);
 	}
 	start_the_simulation(argv_long[0], data.sem_start_barrier.ptr);
-	if (argv_long[4] != -1)
-		check_philos_meals(argv_long[0], data.min_meals_count_barrier.ptr);
-	else
-		sem_wait(data.sem_end_barrier.ptr);
-	end_the_simulation(argv_long[0], philos);
+	wait_trigger_ending(argv_long, &data);
+	end_the_simulation(argv_long[0], philos->data);
+	if (wait_philos(argv_long[0], philos) == EXIT_FAILURE)
+	{
+		full_cleanup(argv_long[0], &data, philos);
+		return (EXIT_FAILURE);
+	}
 	full_cleanup(argv_long[0], &data, philos);
 	return (EXIT_SUCCESS);
 }
@@ -51,21 +53,17 @@ static bool	argv_to_long(int argc, char **argv, long argv_long[5])
 	int	i;
 
 	if (argc <= 3 || argc >= 6)
-	{
-		print_error(ERROR_ARGS_NB);
-		return (false);
-	}
+		return (print_error(ERROR_ARGS_NB));
 	if (argc == 4)
 		argv_long[4] = -1;
 	i = 0;
 	while (i < argc)
 	{
 		argv_long[i] = atol_alt(argv[i]);
-		if (argv_long[i] < 0 || (i == 0 && argv_long[i] == 0))
-		{
-			print_error(ERROR_BAD_ARGS);
-			return (false);
-		}
+		if (i == 0 && (argv_long[i] == 0 || argv_long[i] > MAX_THREAD_NB))
+			return (print_error(ERROR_THREAD_NB));
+		if (argv_long[i] < 0)
+			return (print_error(ERROR_BAD_ARGS));
 		i++;
 	}
 	return (true);

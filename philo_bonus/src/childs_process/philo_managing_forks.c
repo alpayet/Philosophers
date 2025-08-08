@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 20:37:09 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:05:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:39:42 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,20 +14,20 @@
 
 t_sim_state	philo_takes_forks(t_philo *philo)
 {
-	sem_wait(philo->data->mutex_forks_acquisition.ptr);
+	sem_wait(philo->data->forks_acquisition_mutex.ptr);
 	sem_wait(philo->data->sem_forks_nb.ptr);
 	if (monitor_simulation(philo, PHILO_TAKEN_FORK_MSG) == END_OF_SIMULATION)
 	{
-		sem_post(philo->data->mutex_forks_acquisition.ptr);
+		sem_post(philo->data->forks_acquisition_mutex.ptr);
 		return (END_OF_SIMULATION);
 	}
 	sem_wait(philo->data->sem_forks_nb.ptr);
 	if (monitor_simulation(philo, PHILO_TAKEN_FORK_MSG) == END_OF_SIMULATION)
 	{
-		sem_post(philo->data->mutex_forks_acquisition.ptr);
+		sem_post(philo->data->forks_acquisition_mutex.ptr);
 		return (END_OF_SIMULATION);
 	}
-	sem_post(philo->data->mutex_forks_acquisition.ptr);
+	sem_post(philo->data->forks_acquisition_mutex.ptr);
 	return (SIMULATION_CONTINUES);
 }
 

@@ -6,25 +6,23 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 19:44:40 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/31 16:44:31 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/08 00:00:48 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo_bonus.h"
 #include <sys/time.h>
 
-void	print_error(char *str)
+bool	print_error(char *str)
 {
 	write(2, str, ft_strlen(str));
+	return (false);
 }
 
 bool	check_malloc(void *ptr)
 {
 	if (ptr == NULL)
-	{
-		print_error(ERROR_MALLOC);
-		return (false);
-	}
+		return (print_error(ERROR_MALLOC));
 	return (true);
 }
 

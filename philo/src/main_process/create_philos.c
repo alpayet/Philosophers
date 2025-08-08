@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 16:08:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/31 18:39:42 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/07 23:55:56 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,22 +65,18 @@ static void	init_philo_config(t_philo *philos, size_t index, t_data *data)
 static bool	init_philo_mutexes(t_philo *philo)
 {
 	if (pthread_mutex_init(&(philo->mutex_last_time_eat), NULL) != 0)
-	{
-		print_error(ERROR_MUTEX_INIT);
-		return (false);
-	}
+		return (print_error(ERROR_MUTEX_INIT));
 	if (pthread_mutex_init(&(philo->mutex_meals_count), NULL) != 0)
 	{
 		pthread_mutex_destroy(&(philo->mutex_last_time_eat));
-		print_error(ERROR_MUTEX_INIT);
-		return (false);
+		return (print_error(ERROR_MUTEX_INIT));
 	}
 	return (true);
 }
 
 static bool	creat_philo_thread(t_philo *philo)
 {
-	void	*(*routine)(void *arg);
+	void	*(*routine)(void *);
 
 	if (philo->philo_id % 2 == 0)
 		routine = thread_even_routine;
@@ -89,8 +85,7 @@ static bool	creat_philo_thread(t_philo *philo)
 	if (pthread_create(&(philo->thread_id), NULL, routine, philo) != 0)
 	{
 		end_the_simulation(philo->data);
-		print_error(ERROR_THREAD_CREATE);
-		return (false);
+		return (print_error(ERROR_THREAD_CREATE));
 	}
 	return (true);
 }
