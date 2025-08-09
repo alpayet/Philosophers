@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 20:30:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:05:25 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/08 21:58:20 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,7 @@ t_sim_state	philo_thinking(t_philo *philo);
 
 void	process_routine(t_philo *philo)
 {
-	sem_wait(philo->data->sem_start_barrier.ptr);
-	philo->last_time_eat = get_current_time_in_ms();
-	while (monitor_simulation(philo, NULL) == SIMULATION_CONTINUES)
+	while (is_simulation_ended(philo) == SIMULATION_CONTINUES)
 	{
 		if (philo_eating(philo) == END_OF_SIMULATION)
 			return ;

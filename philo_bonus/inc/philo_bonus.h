@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/23 08:38:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/08 13:47:22 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 18:26:39 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,18 +41,12 @@
 # define SEM_FILE_SIMU_START_BARRIER "/simu_start_barrier"
 # define SEM_FILE_SIMU_END_BARRIER "/simu_end_barrier"
 # define SEM_FILE_SHOULD_EXIT_MUTEX "/should_exit_mutex"
+# define SEM_FILE_LAST_TIME_EAT_MUTEX "/last_time_eat_mutex"
 # define SEM_FILE_THREAD_START_BARRIER "/thread_start_barrier"
 # define SEM_FILE_THREAD_END_BARRIER "/thread_end_barrier"
 
 //Milliseconds.
 typedef int64_t	t_milliseconds;
-
-typedef enum e_error_type
-{
-	NO_ERROR,
-	MALLOC,
-	SEM_OPEN,
-}	t_error_type;
 
 typedef enum e_simulation_state
 {
@@ -60,11 +54,16 @@ typedef enum e_simulation_state
 	SIMULATION_CONTINUES,
 }	t_sim_state;
 
+typedef enum s_philo_state
+{
+	DEAD,
+	ALIVE
+}	t_philo_state;
+
 typedef struct s_named_sem
 {
 	sem_t			*ptr;
 	char			*name;
-	t_error_type	error;
 }	t_named_sem;
 
 typedef struct s_data
@@ -94,6 +93,7 @@ typedef struct s_philo
 	ssize_t				meals_count;
 	bool				should_exit;
 	t_named_sem			should_exit_mutex;
+	t_named_sem			last_time_eat_mutex;
 }	t_philo;
 
 //MAIN_PROCESS
@@ -102,17 +102,17 @@ t_named_sem		open_new_sem_file(char *name, size_t counter);
 void			start_the_simulation(size_t philo_nb, sem_t *sem_start_barrier);
 void			end_the_simulation(size_t philo_nb, t_data *data);
 int				wait_philos(size_t philo_nb, t_philo *philos);
-void			full_cleanup(size_t philo_nb, t_data *data, t_philo *philos);
 
-// CHILDS_PROCESS
+//CHILDS_PROCESS
 
-void			*thread_routine(void *arg);
+void			*wait_for_ending(void *arg);
+void			*update_philo_last_time_eat(void *arg);
 void			process_routine(t_philo *philo);
 t_sim_state		usleep_check(t_philo *philo, t_milliseconds sleep_time);
-t_sim_state		monitor_simulation(t_philo *philo, char *str);
-void			philo_log(t_philo *philo, char *str);
+t_sim_state		is_simulation_ended(t_philo *philo);
+t_sim_state		philo_log(t_philo *philo, char *str, t_philo_state philo_state);
 
-// UTILS
+//UTILS
 
 long			atol_alt(char *nptr);
 size_t			ft_strlen(char *str);
@@ -123,5 +123,11 @@ char			*ft_strjoin(char *s1, char *s2);
 bool			print_error(char *str);
 bool			check_malloc(void *ptr);
 t_milliseconds	get_current_time_in_ms(void);
+
+//CLEANUP
+
+void			full_cleanup(size_t philo_nb, t_data *data, t_philo *philos);
+void			cleanup_data_semaphores(t_data *data);
+void			cleanup_philos_semaphore(size_t philo_nb, t_philo *philos);
 
 #endif

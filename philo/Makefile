@@ -6,6 +6,7 @@ SRC_FILES = \
 	main_process/cleanup.c \
 	main_process/create_forks.c \
 	main_process/create_philos.c \
+	main_process/create_threads.c \
 	main_process/init_data.c \
 	main_process/monitoring.c \
 	main_process/start_end_simulation.c \
@@ -16,6 +17,7 @@ SRC_FILES = \
 	threads/thread_routine.c \
 	utils/atol_alt.c \
 	utils/ft_strlen.c \
+	utils/ft_calloc.c \
 	utils/misc.c
 
 #directories
@@ -30,7 +32,7 @@ DEP = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.d))
 
 NAME = philo
 
-CC = cc -g3
+CC = cc
 THREAD_FLAGS = -pthread
 CFLAGS = -Wall -Wextra -Werror
 

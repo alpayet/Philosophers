@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 20:03:25 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/08 00:01:00 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 16:54:39 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,5 +35,9 @@ void	end_the_simulation(size_t philo_nb, t_data *data)
 		sem_wait(data->sem_threads_end_barrier.ptr);
 		i++;
 	}
-	sem_post(data->print_access_mutex.ptr);
+	while (i < 2 * philo_nb)
+	{
+		sem_post(data->print_access_mutex.ptr);
+		i++;
+	}
 }

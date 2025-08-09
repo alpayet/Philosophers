@@ -1,35 +1,30 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   misc.c                                             :+:      :+:    :+:   */
+/*   ft_calloc.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/07/30 19:44:40 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/09 13:09:26 by alpayet          ###   ########.fr       */
+/*   Created: 2025/07/30 19:40:53 by alpayet           #+#    #+#             */
+/*   Updated: 2025/08/09 17:11:56 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo_bonus.h"
-#include <sys/time.h>
+#include "philo.h"
+#include <string.h>
+#include <stdint.h>
 
-bool	print_error(char *str)
+void	*ft_calloc(size_t nmemb, size_t size)
 {
-	write(2, str, ft_strlen(str));
-	return (false);
-}
+	void	*ptr;
 
-bool	check_malloc(void *ptr)
-{
+	if (nmemb == 0 || size == 0)
+		return (malloc(0));
+	if (nmemb > (SIZE_MAX / size))
+		return (NULL);
+	ptr = malloc(nmemb * size);
 	if (ptr == NULL)
-		return (print_error(ERROR_MALLOC));
-	return (true);
-}
-
-t_milliseconds	get_current_time_in_ms(void)
-{
-	struct timeval	tv;
-
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
+		return (NULL);
+	memset(ptr, 0, nmemb * size);
+	return (ptr);
 }

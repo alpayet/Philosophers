@@ -5,6 +5,7 @@ SRC_FILES = \
 	main_bonus.c \
 	main_process/cleanup.c \
 	main_process/create_philos.c \
+	main_process/create_childs_process.c \
 	main_process/init_data.c \
 	main_process/wait_philos.c \
 	main_process/trigger_ending.c \
@@ -12,9 +13,9 @@ SRC_FILES = \
 	main_process/start_end_simulation.c \
 	childs_process/child_thread_routines.c \
 	childs_process/philo_actions.c \
-	childs_process/philo_log.c \
 	childs_process/philo_managing_forks.c \
 	childs_process/process_routine.c \
+	childs_process/philo_log.c \
 	childs_process/simulation_check.c \
 	utils/atol_alt.c \
 	utils/ft_calloc.c \
@@ -36,11 +37,11 @@ DEP = $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.c=.d))
 
 NAME = philo_bonus
 
-CC = cc -g3
+CC = cc
 THREAD_FLAGS = -pthread
 CFLAGS = -Wall -Wextra -Werror
 
-DEBUG_VALGRIND = valgrind --leak-check=full --show-leak-kinds=all -s
+DEBUG_VALGRIND = valgrind --leak-check=full --show-leak-kinds=all --trace-children=yes -s
 
 all : $(NAME)
 

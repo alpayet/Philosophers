@@ -6,27 +6,39 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 16:08:33 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/07 23:55:56 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 17:16:41 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
+static bool	init_philos(size_t philo_nb, t_fork *forks,
+				t_philo *philos, t_data *data);
+t_philo		*creat_philos_thread(size_t philo_nb, t_philo *philos);
 static void	init_philo_forks(t_philo *philos, size_t index,
 				t_fork *forks, size_t philo_nb);
 static void	init_philo_config(t_philo *philos, size_t index, t_data *data);
 static bool	init_philo_mutexes(t_philo *philo);
-static bool	creat_philo_thread(t_philo *philo);
-void		destroy_one_philo_mutexes(t_philo *philo);
 
 t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 {
 	t_philo	*philos;
-	size_t	i;
 
-	philos = malloc(philo_nb * sizeof(*philos));
+	philos = ft_calloc(philo_nb, sizeof(*philos));
 	if (check_malloc(philos) == false)
 		return (NULL);
+	if (init_philos(philo_nb, forks, philos, data) == false)
+		return (NULL);
+	if (creat_philos_thread(philo_nb, philos) == false)
+		return (NULL);
+	return (philos);
+}
+
+static bool	init_philos(size_t philo_nb, t_fork *forks,
+	t_philo *philos, t_data *data)
+{
+	size_t	i;
+
 	i = 0;
 	while (i < philo_nb)
 	{
@@ -34,18 +46,12 @@ t_philo	*create_philos(size_t philo_nb, t_fork *forks, t_data *data)
 		init_philo_config(philos, i, data);
 		if (init_philo_mutexes(&(philos[i])) == false)
 		{
-			full_cleanup(philo_nb, NULL, NULL, philos);
-			return (NULL);
-		}
-		if (creat_philo_thread(&(philos[i])) == false)
-		{
-			destroy_one_philo_mutexes(&(philos[i]));
-			full_cleanup(philo_nb, NULL, NULL, philos);
-			return (NULL);
+			destroy_philos_mutexes(i, philos);
+			return (false);
 		}
 		i++;
 	}
-	return (philos);
+	return (true);
 }
 
 static void	init_philo_forks(t_philo *philos, size_t index,
@@ -70,22 +76,6 @@ static bool	init_philo_mutexes(t_philo *philo)
 	{
 		pthread_mutex_destroy(&(philo->mutex_last_time_eat));
 		return (print_error(ERROR_MUTEX_INIT));
-	}
-	return (true);
-}
-
-static bool	creat_philo_thread(t_philo *philo)
-{
-	void	*(*routine)(void *);
-
-	if (philo->philo_id % 2 == 0)
-		routine = thread_even_routine;
-	else
-		routine = thread_odd_routine;
-	if (pthread_create(&(philo->thread_id), NULL, routine, philo) != 0)
-	{
-		end_the_simulation(philo->data);
-		return (print_error(ERROR_THREAD_CREATE));
 	}
 	return (true);
 }

@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 01:38:31 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/07 23:49:13 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 17:12:29 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,8 +87,6 @@ typedef struct s_philo
 // MAIN_PROCESS
 
 void			end_the_simulation(t_data *data);
-void			full_cleanup(size_t	thread_nb, t_fork *forks,
-					t_data *data, t_philo *philos);
 
 // THREADS
 
@@ -102,8 +100,16 @@ t_sim_state		usleep_check(t_philo *philo, t_milliseconds sleep_time);
 
 size_t			ft_strlen(char *str);
 long			atol_alt(char *nptr);
+void			*ft_calloc(size_t nmemb, size_t size);
 bool			print_error(char *str);
 bool			check_malloc(void *ptr);
 t_milliseconds	get_current_time_in_ms(void);
+
+//CLEANUP
+
+void			full_cleanup(size_t	thread_nb, t_fork *forks,
+					t_data *data, t_philo *philos);
+void			destroy_philos_mutexes(size_t philo_nb, t_philo *philos);
+void			destroy_forks_mutex(size_t fork_nb, t_fork *forks);
 
 #endif
