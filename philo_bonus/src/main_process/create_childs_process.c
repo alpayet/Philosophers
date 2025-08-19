@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/08 18:26:20 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/09 19:59:03 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/19 23:05:37 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ static bool	create_philo_threads(t_philo *philo,
 	if (pthread_create(thread_update_id, NULL,
 			update_philo_last_time_eat, philo) != 0)
 	{
+		sem_post(philo->data->sem_threads_start_barrier.ptr);
 		pthread_join(*thread_wait_id, NULL);
 		return (false);
 	}

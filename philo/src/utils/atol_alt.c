@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 19:45:32 by alpayet           #+#    #+#             */
-/*   Updated: 2025/07/31 01:49:52 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 22:27:11 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,5 +38,5 @@ long	atol_alt(char *nptr)
 	}
 	if (*nptr != '\0')
 		return (-1);
-	return (n);
+	return (sign * n);
 }

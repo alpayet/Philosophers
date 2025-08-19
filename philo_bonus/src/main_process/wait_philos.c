@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 22:40:43 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/08 23:04:07 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/19 21:52:16 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,7 @@ int	wait_philos(size_t philo_nb, t_philo *philos)
 			if (exit_code == EXIT_SUCCESS && WIFEXITED(wstatus) == true)
 			{
 				if (WEXITSTATUS(wstatus) == EXIT_FAILURE)
-				{
 					exit_code = EXIT_FAILURE;
-				}
 			}
 		}
 		i++;

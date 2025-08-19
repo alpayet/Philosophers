@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 20:06:03 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/08 01:05:10 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 22:25:55 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,10 +16,10 @@ static void	abort_check_meal_in_main(size_t philo_nb,
 				sem_t *min_meals_count_barrier);
 static void	check_philos_meals(size_t philo_nb, sem_t *sem_start_barrier);
 
-void	wait_trigger_ending(long argv_long[5], t_data *data)
+void	wait_trigger_ending(t_data *data)
 {
-	if (argv_long[4] != -1)
-		check_philos_meals(argv_long[0], data->min_meals_count_barrier.ptr);
+	if (data->min_meals_count != -1)
+		check_philos_meals(data->philo_nb, data->min_meals_count_barrier.ptr);
 	else
 		sem_wait(data->sem_end_barrier.ptr);
 }

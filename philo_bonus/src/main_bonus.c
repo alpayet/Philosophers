@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/24 23:52:36 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/08 01:03:15 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/09 22:26:08 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ static bool	argv_to_long(int argc, char **argv, long argv_long[5]);
 bool		init_data(t_data *data, long argv_long[5]);
 t_philo		*create_philos(size_t philo_nb, t_data *data);
 void		start_the_simulation(size_t philo_nb, sem_t *sem_start_barrier);
-void		wait_trigger_ending(long argv_long[5], t_data *data);
+void		wait_trigger_ending(t_data *data);
 
 int	main(int argc, char **argv)
 {
@@ -37,7 +37,7 @@ int	main(int argc, char **argv)
 		return (EXIT_FAILURE);
 	}
 	start_the_simulation(argv_long[0], data.sem_start_barrier.ptr);
-	wait_trigger_ending(argv_long, &data);
+	wait_trigger_ending(&data);
 	end_the_simulation(argv_long[0], philos->data);
 	if (wait_philos(argv_long[0], philos) == EXIT_FAILURE)
 	{
