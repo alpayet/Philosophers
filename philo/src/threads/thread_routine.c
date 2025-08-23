@@ -6,7 +6,7 @@
 /*   By: alpayet <alpayet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 03:21:35 by alpayet           #+#    #+#             */
-/*   Updated: 2025/08/05 16:05:55 by alpayet          ###   ########.fr       */
+/*   Updated: 2025/08/23 22:37:53 by alpayet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,15 @@ void	*thread_odd_routine(void *arg)
 	philo = (t_philo *)arg;
 	if (wait_all_philos(philo) == END_OF_SIMULATION)
 		return (NULL);
+	if (philo_thinking(philo) == END_OF_SIMULATION)
+			return (NULL);
 	while (is_simulation_ended(philo) == false)
 	{
-		if (philo_thinking(philo) == END_OF_SIMULATION)
-			return (NULL);
 		if (philo_eating(philo, philo_odd_takes_forks) == END_OF_SIMULATION)
 			return (NULL);
 		if (philo_sleeping(philo) == END_OF_SIMULATION)
+			return (NULL);
+		if (philo_thinking(philo) == END_OF_SIMULATION)
 			return (NULL);
 		control_scheduler(philo);
 	}
@@ -49,14 +51,16 @@ void	*thread_even_routine(void *arg)
 	philo = (t_philo *)arg;
 	if (wait_all_philos(philo) == END_OF_SIMULATION)
 		return (NULL);
+	if (philo_thinking(philo) == END_OF_SIMULATION)
+		return (NULL);
 	create_offset(philo);
 	while (is_simulation_ended(philo) == false)
 	{
-		if (philo_thinking(philo) == END_OF_SIMULATION)
-			return (NULL);
 		if (philo_eating(philo, philo_even_takes_forks) == END_OF_SIMULATION)
 			return (NULL);
 		if (philo_sleeping(philo) == END_OF_SIMULATION)
+			return (NULL);
+		if (philo_thinking(philo) == END_OF_SIMULATION)
 			return (NULL);
 		control_scheduler(philo);
 	}
